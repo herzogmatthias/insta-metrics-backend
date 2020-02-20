@@ -38,3 +38,9 @@ export const newUser = async (req: e.Request, res: e.Response) => {
   };
   res.json({ error: false, text: "New User added!", basicInformation });
 };
+
+export const deleteUser = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username;
+  UserRepository.deleteUser(username);
+  res.json({ error: false, text: "User deleted!" });
+};
