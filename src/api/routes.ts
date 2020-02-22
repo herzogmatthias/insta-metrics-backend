@@ -1,5 +1,9 @@
 import e = require("express");
-import { basicInformation } from "./basicInformationController";
+import {
+  basicInformation,
+  lastThreePosts,
+  pricePerPost
+} from "./basicInformationController";
 import { newUser, deleteUser } from "./UserController";
 import { login } from "./loginController";
 import { checkToken } from "../middleware/jwt_middleware";
@@ -13,6 +17,10 @@ const routes = (app: e.Express) => {
   app
     .route("/advanced-information/comments-and-likes/:username")
     .post(getCommentsandLikesXPictures);
+  app
+    .route("/basic-information/last-three-pictures/:username")
+    .get(lastThreePosts);
+  app.route("/advanced-information/price-per-post/:username").get(pricePerPost);
 };
 
 export default routes;

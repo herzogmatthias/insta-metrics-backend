@@ -24,4 +24,16 @@ export default class UserRepository {
       }
     });
   }
+
+  static findUser(username: string) {
+    return new Promise((res, rej) => {
+      User.findOne({
+        where: {
+          userName: username
+        }
+      }).then((user: any) => {
+        res(user.get({ plain: true }) as User);
+      });
+    });
+  }
 }

@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import fetch from "node-fetch";
 
 export class UserInformation {
   private browser: puppeteer.Browser | undefined;
@@ -7,7 +8,7 @@ export class UserInformation {
 
   public static InitAsync = async () => {
     const ui = new UserInformation();
-    ui.browser = await puppeteer.launch();
+    ui.browser = await puppeteer.launch({ headless: false });
     ui.page = await ui.browser.newPage();
     return ui;
   };
@@ -52,9 +53,27 @@ export class UserInformation {
     const descriptionHandle = await (await this.page?.$$(".-vDIg"))![0].$(
       "span"
     );
-    console.log(
-      await (await descriptionHandle?.getProperty("textContent"))?.jsonValue()
-    );
+    return (await (
+      await descriptionHandle?.getProperty("textContent")
+    )?.jsonValue()) as string;
+  }
+  async getLastThreePosts(url: string) {
+    await this.page?.goto(url);
+    const pictures = (await this.page?.$$(".v1Nh3"))!;
+    const embedHTML: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      await pictures[i].click();
+      await this.page?.waitFor(1000);
+      console.log(this.page?.url());
+      const response = await fetch(
+        `https://api.instagram.com/oembed/?url=${this.page?.url()}`,
+        { method: "GET" }
+      );
+      const body = await response.json();
+      embedHTML.push(body.html);
+      await this.page?.goBack();
+    }
+    return embedHTML;
   }
   static async getKey(value: puppeteer.ElementHandle<Element>) {
     return ((await (
@@ -84,5 +103,9 @@ export class UserInformation {
     } else {
       return Number(await (await value.getProperty("textContent")).jsonValue());
     }
+  }
+
+  stopBrowser() {
+    this.browser?.close();
   }
 }

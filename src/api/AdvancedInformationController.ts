@@ -14,5 +14,6 @@ export const getCommentsandLikesXPictures = async (
     `https://www.instagram.com/${username}/`,
     maxPictures
   );
+  ai.stopBrowser();
   res.json(pictureStats);
 };

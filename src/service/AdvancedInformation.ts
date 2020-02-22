@@ -1,5 +1,7 @@
 import puppeteer from "puppeteer";
 import { PictureStats } from "../interfaces/PictureStats";
+import UserRepository from "../repositories/userRepository";
+import User from "../interfaces/User";
 
 export default class AdvancedInformation {
   private browser: puppeteer.Browser | undefined;
@@ -36,6 +38,12 @@ export default class AdvancedInformation {
     return pictureStats;
   }
 
+  async getPriceForPost(username: string) {
+    const user = (await UserRepository.findUser(username)) as User;
+    const price = (user.followers / 100) * 10;
+    return { min: price - price * 0.05, max: price + price * 0.2 };
+  }
+
   private async autoScroll(imageNumber: number) {
     const delay = 1000;
     let preCount = 0;
@@ -56,5 +64,8 @@ export default class AdvancedInformation {
       console.log(allItems);
       allItems[allItems.length - 1].scrollIntoView();
     });
+  }
+  stopBrowser() {
+    this.browser?.close();
   }
 }
