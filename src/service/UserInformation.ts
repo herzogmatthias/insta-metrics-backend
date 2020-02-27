@@ -8,7 +8,7 @@ export class UserInformation {
 
   public static InitAsync = async () => {
     const ui = new UserInformation();
-    ui.browser = await puppeteer.launch({ headless: false });
+    ui.browser = await puppeteer.launch({ headless: true });
     ui.page = await ui.browser.newPage();
     return ui;
   };

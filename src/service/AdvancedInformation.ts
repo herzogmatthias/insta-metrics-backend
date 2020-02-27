@@ -2,6 +2,9 @@ import puppeteer from "puppeteer";
 import { PictureStats } from "../interfaces/PictureStats";
 import UserRepository from "../repositories/userRepository";
 import User from "../interfaces/User";
+import devices from "puppeteer/DeviceDescriptors";
+import { InstagramData } from "../interfaces/InstagramData";
+import fetch from "node-fetch";
 
 export default class AdvancedInformation {
   private browser: puppeteer.Browser | undefined;
@@ -14,26 +17,30 @@ export default class AdvancedInformation {
       headless: false
     });
     ai.page = await ai.browser.newPage();
+    await ai.page.emulate(devices["Pixel 2"]);
     return ai;
   };
 
-  async getCommentsandLikesXPictures(url: string, maxPictures: number) {
+  async getCommentsandLikesXPosts(url: string, maxPictures: number) {
     await this.page?.goto(url);
     await this.autoScroll(maxPictures);
-    const pictures = (await this.page?.$$(".v1Nh3"))!;
     const pictureStats: PictureStats[] = [];
     for (let i = 0; i < maxPictures; i++) {
-      await pictures[i].hover();
-      const likesAndComments = (await pictures[i].$$(".qn-0x"))[0];
-      const result = await likesAndComments.$("ul.Ln-UN");
-      let comments = (await (
-        await (await result!.$$("li"))[1]!.getProperty("textContent")
-      ).jsonValue()) as number;
-      let likes = (await (
-        await (await result!.$$("li"))[0]!.getProperty("textContent")
-      ).jsonValue()) as number;
-
-      pictureStats.push({ likes, comments });
+      if (i > 11) {
+        await this.autoScroll(maxPictures);
+      }
+      const picture = (await this.page?.$$(".v1Nh3 > a"))![i];
+      const response = await fetch(
+        ((await (await picture.getProperty("href")).jsonValue()) as string) +
+          "?__a=1"
+      );
+      const data = await response.json();
+      const imageData: InstagramData = data;
+      pictureStats.push({
+        comments:
+          imageData.graphql.shortcode_media.edge_media_preview_comment.count,
+        likes: imageData.graphql.shortcode_media.edge_media_preview_like.count
+      });
     }
     return pictureStats;
   }
@@ -42,6 +49,28 @@ export default class AdvancedInformation {
     const user = (await UserRepository.findUser(username)) as User;
     const price = (user.followers / 100) * 10;
     return { min: price - price * 0.05, max: price + price * 0.2 };
+  }
+
+  async getErForPost(username: string, id: string) {
+    const followers = await UserRepository.getFollowersForUsername(username);
+    const response = await fetch(`https://www.instagram.com/p/${id}/?__a=1`);
+    const data = await response.json();
+    const imageData: InstagramData = data;
+    return (
+      ((imageData.graphql.shortcode_media.edge_media_preview_comment.count +
+        imageData.graphql.shortcode_media.edge_media_preview_like.count) /
+        followers) *
+      100
+    );
+  }
+
+  private async checkForVideo(): Promise<boolean> {
+    try {
+      const playButton = await this.page?.$eval("video", e => {});
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async autoScroll(imageNumber: number) {
