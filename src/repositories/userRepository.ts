@@ -47,4 +47,15 @@ export default class UserRepository {
       });
     });
   }
+  static getEngagementRateForUsername(username: string): Promise<number> {
+    return new Promise((res, rej) => {
+      User.findOne({
+        where: {
+          userName: username
+        }
+      }).then((user: any) => {
+        res((user.get({ plain: true }) as User).avgEngagementRate);
+      });
+    });
+  }
 }

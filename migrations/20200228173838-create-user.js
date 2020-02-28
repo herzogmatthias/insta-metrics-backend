@@ -30,13 +30,13 @@ module.exports = {
         type: Sequelize.STRING
       },
       avgEngagementRate: {
-        type: Sequelize.DECIMAL(10, 2)
+        type: Sequelize.DECIMAL
       },
       avgPriceMin: {
-        type: Sequelize.DECIMAL(10, 2)
+        type: Sequelize.DECIMAL
       },
       avgPriceMax: {
-        type: Sequelize.DECIMAL(10, 2)
+        type: Sequelize.DECIMAL
       },
       createdAt: {
         allowNull: false,

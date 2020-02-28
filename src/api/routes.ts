@@ -1,15 +1,14 @@
 import e = require("express");
-import {
-  basicInformation,
-  lastThreePosts,
-  pricePerPost
-} from "./basicInformationController";
+import { basicInformation, lastThreePosts } from "./basicInformationController";
 import { newUser, deleteUser } from "./UserController";
 import { login } from "./loginController";
 import { checkToken } from "../middleware/jwt_middleware";
 import {
   getCommentsandLikesXPosts,
-  getErForPost
+  getErForPost,
+  avgPriceForAds,
+  getAvgCommentsAndLikes,
+  getAvgEngagementRate
 } from "./AdvancedInformationController";
 
 const routes = (app: e.Express) => {
@@ -23,7 +22,15 @@ const routes = (app: e.Express) => {
   app
     .route("/basic-information/last-three-pictures/:username")
     .get(lastThreePosts);
-  app.route("/advanced-information/price-per-post/:username").get(pricePerPost);
+  app
+    .route("/advanced-information/avg-price-for-ads/:username")
+    .get(avgPriceForAds);
+  app
+    .route("/advanced-information/avg-likes-and-comments/:username")
+    .get(getAvgCommentsAndLikes);
+  app
+    .route("/advanced-information/avg-engagementrate/:username")
+    .get(getAvgEngagementRate);
   app.route("/advanced-information/er-for-post/:username").post(getErForPost);
 };
 

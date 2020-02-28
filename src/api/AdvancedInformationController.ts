@@ -17,12 +17,35 @@ export const getCommentsandLikesXPosts = async (
   ai.stopBrowser();
   res.json(pictureStats);
 };
+export const getAvgCommentsAndLikes = async (
+  req: e.Request,
+  res: e.Response
+) => {
+  const username = req.params.username as string;
+
+  const avgStats = await AdvancedInformation.getAvgCommentsAndLikes(
+    `https://www.instagram.com/${username}/`
+  );
+  res.json(avgStats);
+};
+export const getAvgEngagementRate = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username as string;
+
+  const avgStats = await AdvancedInformation.getAvgEngagementRate(
+    `https://www.instagram.com/${username}/`
+  );
+  res.json(avgStats);
+};
 
 export const getErForPost = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
   const id = req.body.id as string;
-  const ai = await AdvancedInformation.InitAsync();
-  const er = await ai.getErForPost(username, id);
-  ai.stopBrowser();
+  const er = await AdvancedInformation.getErForPost(username, id);
   res.json({ engagementRate: er });
+};
+export const avgPriceForAds = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username;
+  const URI = `https://www.instagram.com/${username}/`;
+  const prices = await AdvancedInformation.getAvgPriceForAds(URI);
+  res.json(prices);
 };

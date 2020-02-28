@@ -33,10 +33,3 @@ export const lastThreePosts = async (req: e.Request, res: e.Response) => {
   ui.stopBrowser();
   res.json(embedHTML);
 };
-
-export const pricePerPost = async (req: e.Request, res: e.Response) => {
-  const username = req.params.username;
-  const ai = await AdvancedInformation.InitAsync();
-  const prices = await ai.getPriceForPost(username);
-  res.json(prices);
-};
