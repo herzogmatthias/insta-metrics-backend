@@ -1,5 +1,9 @@
 import e = require("express");
-import { basicInformation, lastThreePosts } from "./basicInformationController";
+import {
+  basicInformation,
+  lastThreePosts,
+  tags
+} from "./basicInformationController";
 import { newUser, deleteUser } from "./UserController";
 import { login } from "./loginController";
 import { checkToken } from "../middleware/jwt_middleware";
@@ -32,6 +36,7 @@ const routes = (app: e.Express) => {
     .route("/advanced-information/avg-engagementrate/:username")
     .get(getAvgEngagementRate);
   app.route("/advanced-information/er-for-post/:username").post(getErForPost);
+  app.route("/basic-information/tags/:username").get(tags);
 };
 
 export default routes;

@@ -4,32 +4,34 @@ import UserRepository from "../repositories/userRepository";
 import User from "../interfaces/User";
 import BasicUserInformation from "../interfaces/BasicUserInformation";
 import AdvancedInformation from "../service/AdvancedInformation";
+import { UserRootData } from "../interfaces/InstagramUserData";
 
 export const basicInformation = async (req: e.Request, res: e.Response) => {
   const users = (await UserRepository.getAllUsers()) as User[];
-  const userInformation = await UserInformation.InitAsync();
-  let imagesrc;
-  let name;
+  const userInformation = new UserInformation();
   let userData: BasicUserInformation[] = [];
   for (const user of users) {
-    imagesrc = await userInformation.getProfilePicture(
-      `https://www.instagram.com/${user.userName}/`
+    const userInfo: BasicUserInformation = await userInformation.getBasicInformation(
+      `https://www.instagram.com/${user.userName}/?__a=1`
     );
-    name = await userInformation.getName(
-      `https://www.instagram.com/${user.userName}/`
-    );
-    userData.push({ avatar: imagesrc, name, username: user.userName });
+
+    userData.push(userInfo);
   }
-  userInformation.stopBrowser();
   res.send(userData);
 };
 
 export const lastThreePosts = async (req: e.Request, res: e.Response) => {
   const username = req.params.username;
-  const ui = await UserInformation.InitAsync();
+  const ui = new UserInformation();
   const embedHTML = await ui.getLastThreePosts(
     `https://www.instagram.com/${username}/`
   );
-  ui.stopBrowser();
   res.json(embedHTML);
+};
+
+export const tags = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username;
+  const ui = new UserInformation();
+  const tags = await ui.getTags(`https://www.instagram.com/${username}/?__a=1`);
+  res.status(200).json(tags);
 };

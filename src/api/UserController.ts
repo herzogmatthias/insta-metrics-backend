@@ -23,24 +23,24 @@ export const newUser = async (req: e.Request, res: e.Response) => {
       .json({ text: "Username already exists", error: true } as Error);
     return;
   }
-  const ui = await UserInformation.InitAsync();
+  const ui = new UserInformation();
   const basicStats = await ui.getBasicStats(URI);
   const avgStats = await AdvancedInformation.getAvgCommentsAndLikes(URI);
   const avgER = await AdvancedInformation.getAvgEngagementRate(
     URI,
-    basicStats.get("followers") || basicStats.get("follower")!
+    basicStats.followers
   );
   console.log(avgER);
   const avgAdPrice = await AdvancedInformation.getAvgPriceForAds(
     URI,
     avgER,
-    basicStats.get("followers") || basicStats.get("follower")!
+    basicStats.followers
   );
   let user: User = {
     userName: req.params.username,
-    followers: basicStats.get("followers") || basicStats.get("follower")!,
-    following: basicStats.get("following")!,
-    posts: basicStats.get("posts") || basicStats.get("post")!,
+    followers: basicStats.followers,
+    following: basicStats.following,
+    posts: basicStats.posts,
     password: "",
     avgComments: avgStats.comments,
     avgLikes: avgStats.likes,
@@ -50,11 +50,9 @@ export const newUser = async (req: e.Request, res: e.Response) => {
   };
   console.log(user);
   UserRepository.addUser(user);
-  const basicInformation: BasicUserInformation = {
-    username: req.params.username,
-    avatar: await ui.getProfilePicture(URI),
-    name: await ui.getName(URI)
-  };
+  const basicInformation: BasicUserInformation = await ui.getBasicInformation(
+    URI + "?__a=1"
+  );
   res.json({ error: false, text: "New User added!", basicInformation });
 };
 
