@@ -20,8 +20,8 @@ export default class UserRepository {
   static deleteUser(username: string) {
     User.destroy({
       where: {
-        userName: username
-      }
+        userName: username,
+      },
     });
   }
 
@@ -29,8 +29,8 @@ export default class UserRepository {
     return new Promise((res, rej) => {
       User.findOne({
         where: {
-          userName: username
-        }
+          userName: username,
+        },
       }).then((user: any) => {
         res(user.get({ plain: true }) as User);
       });
@@ -40,8 +40,8 @@ export default class UserRepository {
     return new Promise((res, rej) => {
       User.findOne({
         where: {
-          userName: username
-        }
+          userName: username,
+        },
       }).then((user: any) => {
         res((user.get({ plain: true }) as User).followers);
       });
@@ -51,10 +51,24 @@ export default class UserRepository {
     return new Promise((res, rej) => {
       User.findOne({
         where: {
-          userName: username
-        }
+          userName: username,
+        },
       }).then((user: any) => {
         res((user.get({ plain: true }) as User).avgEngagementRate);
+      });
+    });
+  }
+  static getIgIdAndCursor(username: string): Promise<string[]> {
+    return new Promise((res, rej) => {
+      User.findOne({
+        where: {
+          userName: username,
+        },
+      }).then((user: any) => {
+        res([
+          (user.get({ plain: true }) as User).igId,
+          (user.get({ plain: true }) as User).cursor,
+        ]);
       });
     });
   }

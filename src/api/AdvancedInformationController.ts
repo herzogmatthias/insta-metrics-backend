@@ -1,21 +1,17 @@
 import e from "express";
 import AdvancedInformation from "../service/AdvancedInformation";
+import { Instagram_Url } from "../config";
 
-export const getCommentsandLikesXPosts = async (
-  req: e.Request,
-  res: e.Response
-) => {
+export const getLastFiftyPictures = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
-  const maxPictures = req.body.maxPictures as number;
-
-  const ai = await AdvancedInformation.InitAsync();
-
-  const pictureStats = await ai.getCommentsandLikesXPosts(
-    `https://www.instagram.com/${username}/`,
-    maxPictures
-  );
-  ai.stopBrowser();
-  res.json(pictureStats);
+  const images = await AdvancedInformation.getLastFiftyPictures(username);
+  res.json(images);
+};
+export const getDetailsForPicture = async (req: e.Request, res: e.Response) => {
+  const shortCode = req.params.shortcode as string;
+  const image = await AdvancedInformation.getDetailsForPicture(shortCode);
+  console.log(image);
+  res.json(image);
 };
 export const getAvgCommentsAndLikes = async (
   req: e.Request,
@@ -24,7 +20,7 @@ export const getAvgCommentsAndLikes = async (
   const username = req.params.username as string;
 
   const avgStats = await AdvancedInformation.getAvgCommentsAndLikes(
-    `https://www.instagram.com/${username}/`
+    `${Instagram_Url}${username}/`
   );
   res.json(avgStats);
 };
@@ -32,7 +28,7 @@ export const getAvgEngagementRate = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
 
   const avgStats = await AdvancedInformation.getAvgEngagementRate(
-    `https://www.instagram.com/${username}/`
+    `${Instagram_Url}${username}/`
   );
   res.json(avgStats);
 };
@@ -45,7 +41,7 @@ export const getErForPost = async (req: e.Request, res: e.Response) => {
 };
 export const avgPriceForAds = async (req: e.Request, res: e.Response) => {
   const username = req.params.username;
-  const URI = `https://www.instagram.com/${username}/`;
+  const URI = `${Instagram_Url}${username}/`;
   const prices = await AdvancedInformation.getAvgPriceForAds(URI);
   res.json(prices);
 };

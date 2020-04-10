@@ -6,49 +6,55 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       userName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       followers: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       posts: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       following: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       avgLikes: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       avgComments: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      igId: {
+        type: Sequelize.STRING,
+      },
+      cursor: {
+        type: Sequelize.STRING,
       },
       avgEngagementRate: {
-        type: Sequelize.DECIMAL(10, 2)
+        type: Sequelize.DECIMAL(10, 2),
       },
       avgPriceMin: {
-        type: Sequelize.DECIMAL(10, 2)
+        type: Sequelize.DECIMAL(10, 2),
       },
       avgPriceMax: {
-        type: Sequelize.DECIMAL(10, 2)
+        type: Sequelize.DECIMAL(10, 2),
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable("Users");
-  }
+  },
 };

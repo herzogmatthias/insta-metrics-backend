@@ -5,6 +5,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       userName: DataTypes.STRING,
       followers: DataTypes.NUMBER,
+      igId: DataTypes.STRING,
+      cursor: DataTypes.STRING,
       posts: DataTypes.NUMBER,
       following: DataTypes.NUMBER,
       avgLikes: DataTypes.NUMBER,
@@ -12,11 +14,11 @@ module.exports = (sequelize, DataTypes) => {
       password: DataTypes.STRING,
       avgEngagementRate: DataTypes.DECIMAL,
       avgPriceMin: DataTypes.DECIMAL,
-      avgPriceMax: DataTypes.DECIMAL
+      avgPriceMax: DataTypes.DECIMAL,
     },
     {}
   );
-  User.associate = function(models) {
+  User.associate = function (models) {
     // associations can be defined here
   };
   return User;

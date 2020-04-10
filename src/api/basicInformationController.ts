@@ -3,8 +3,6 @@ import { UserInformation } from "../service/UserInformation";
 import UserRepository from "../repositories/userRepository";
 import User from "../interfaces/User";
 import BasicUserInformation from "../interfaces/BasicUserInformation";
-import AdvancedInformation from "../service/AdvancedInformation";
-import { UserRootData } from "../interfaces/InstagramUserData";
 
 export const basicInformation = async (req: e.Request, res: e.Response) => {
   const users = (await UserRepository.getAllUsers()) as User[];
@@ -18,15 +16,6 @@ export const basicInformation = async (req: e.Request, res: e.Response) => {
     userData.push(userInfo);
   }
   res.send(userData);
-};
-
-export const lastThreePosts = async (req: e.Request, res: e.Response) => {
-  const username = req.params.username;
-  const ui = new UserInformation();
-  const embedHTML = await ui.getLastThreePosts(
-    `https://www.instagram.com/${username}/`
-  );
-  res.json(embedHTML);
 };
 
 export const tags = async (req: e.Request, res: e.Response) => {

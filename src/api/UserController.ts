@@ -4,11 +4,11 @@ import { checkUserName } from "../service/checkUsername";
 import Error from "../interfaces/Error";
 import { UserInformation } from "../service/UserInformation";
 import User from "../interfaces/User";
-import BasicUserInformation from "../interfaces/BasicUserInformation";
 import AdvancedInformation from "../service/AdvancedInformation";
+import { Instagram_Api_Param, Instagram_Url } from "../config";
 
 export const newUser = async (req: e.Request, res: e.Response) => {
-  const URI = `https://www.instagram.com/${req.params.username}/`;
+  const URI = `${Instagram_Url}${req.params.username}/${Instagram_Api_Param}`;
   const validUsername = await checkUserName(req.params.username);
   if (!validUsername) {
     res
@@ -17,7 +17,7 @@ export const newUser = async (req: e.Request, res: e.Response) => {
     return;
   }
   const users = (await UserRepository.getAllUsers()) as any[];
-  if (users.find(v => v.userName === req.params.username)) {
+  if (users.find((v) => v.userName === req.params.username)) {
     res
       .status(400)
       .json({ text: "Username already exists", error: true } as Error);
@@ -25,6 +25,7 @@ export const newUser = async (req: e.Request, res: e.Response) => {
   }
   const ui = new UserInformation();
   const basicStats = await ui.getBasicStats(URI);
+  const [id, cursor] = await ui.getIgIdandCursor(URI);
   const avgStats = await AdvancedInformation.getAvgCommentsAndLikes(URI);
   const avgER = await AdvancedInformation.getAvgEngagementRate(
     URI,
@@ -42,17 +43,17 @@ export const newUser = async (req: e.Request, res: e.Response) => {
     following: basicStats.following,
     posts: basicStats.posts,
     password: "",
+    cursor: cursor!,
+    igId: id!,
     avgComments: avgStats.comments,
     avgLikes: avgStats.likes,
     avgEngagementRate: avgER,
     avgPriceMin: avgAdPrice.min,
-    avgPriceMax: avgAdPrice.max
+    avgPriceMax: avgAdPrice.max,
   };
   console.log(user);
+  const basicInformation = await ui.getBasicInformation(URI);
   UserRepository.addUser(user);
-  const basicInformation: BasicUserInformation = await ui.getBasicInformation(
-    URI + "?__a=1"
-  );
   res.json({ error: false, text: "New User added!", basicInformation });
 };
 

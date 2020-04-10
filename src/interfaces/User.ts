@@ -10,4 +10,6 @@ export default interface User {
   avgEngagementRate: number;
   avgPriceMin: number;
   avgPriceMax: number;
+  cursor: string;
+  igId: string;
 }

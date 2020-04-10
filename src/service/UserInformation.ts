@@ -3,7 +3,12 @@ import fetch, { FetchError, Response } from "node-fetch";
 import { UserRootData } from "../interfaces/InstagramUserData";
 import BasicUserInformation from "../interfaces/BasicUserInformation";
 import { BasicStatistics } from "../interfaces/BasicStatistics";
-import { imagga_basic_auth } from "../config";
+import {
+  imagga_basic_auth,
+  Instagram_Url,
+  Instagram_Api_Param,
+} from "../config";
+import { PostRootData } from "../interfaces/InstagramPostData";
 
 export class UserInformation {
   constructor() {}
@@ -14,48 +19,38 @@ export class UserInformation {
     return {
       avatar: user.profile_pic_url,
       name: user.full_name,
-      username: user.username
+      username: user.username,
     };
   }
   async getBasicStats(url: string): Promise<BasicStatistics> {
     const user = ((await (await fetch(url)).json()) as UserRootData).graphql
       .user;
-
     return {
       following: user.edge_follow.count,
       followers: user.edge_followed_by.count,
-      posts: user.edge_owner_to_timeline_media.count
+      posts: user.edge_owner_to_timeline_media.count,
     };
   }
-  async getLastThreePosts(url: string) {
-    const browser: puppeteer.Browser = await puppeteer.launch({
-      headless: true
-    });
-    const page: puppeteer.Page | undefined = await browser.newPage();
-    await page?.goto(url);
-    const pictures = (await page?.$$(".v1Nh3"))!;
-    const embedHTML: string[] = [];
-    for (let i = 0; i < 3; i++) {
-      await pictures[i].click();
-      await page?.waitFor(1000);
-      console.log(page?.url());
-      const response = await fetch(
-        `https://api.instagram.com/oembed/?url=${page?.url()}`,
-        { method: "GET" }
-      );
-      const body = await response.json();
-      embedHTML.push(body.html);
-      await page?.goBack();
-    }
-    browser.close();
-    return embedHTML;
+
+  async getIgIdandCursor(url: string) {
+    const data = ((await (await fetch(url)).json()) as UserRootData).graphql
+      .user;
+    const id = data.id;
+    console.log(id);
+    const firstShortCode =
+      data.edge_owner_to_timeline_media.edges[0].node.shortcode;
+    const picture = ((await (
+      await fetch(`${Instagram_Url}p/${firstShortCode}/${Instagram_Api_Param}`)
+    ).json()) as PostRootData).graphql.shortcode_media;
+    const cursor = picture.edge_media_to_parent_comment.page_info.end_cursor;
+    return [id, cursor];
   }
 
   async getTags(url: string) {
     const pictures = ((await (
       await fetch(url)
     ).json()) as UserRootData).graphql.user.edge_owner_to_timeline_media.edges!.filter(
-      v => !v.node.is_video
+      (v) => !v.node.is_video
     );
     const tags: string[] = [];
     const responses: Response[] = [];
@@ -67,8 +62,8 @@ export class UserInformation {
             encodeURIComponent(pictures[i].node.display_url),
           {
             headers: {
-              Authorization: imagga_basic_auth
-            }
+              Authorization: imagga_basic_auth,
+            },
           }
         )
       );
