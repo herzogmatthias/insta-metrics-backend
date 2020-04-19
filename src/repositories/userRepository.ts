@@ -42,9 +42,13 @@ export default class UserRepository {
         where: {
           userName: username,
         },
-      }).then((user: any) => {
-        res((user.get({ plain: true }) as User).followers);
-      });
+      })
+        .then((user: any) => {
+          res((user.get({ plain: true }) as User).followers);
+        })
+        .catch((err: any) => {
+          res(-1);
+        });
     });
   }
   static getEngagementRateForUsername(username: string): Promise<number> {

@@ -1,39 +1,42 @@
 import e = require("express");
-import { basicInformation, tags } from "./basicInformationController";
-import { newUser, deleteUser } from "./UserController";
-import { login } from "./loginController";
+
+import {
+  newUser,
+  deleteUser,
+  basicInformation,
+  avgPriceForAds,
+  getAvgEngagementRate,
+  tags,
+} from "./UserController";
+import { login } from "./LoginController";
 import { checkToken } from "../middleware/jwt_middleware";
 import {
-  getErForPost,
-  avgPriceForAds,
-  getAvgCommentsAndLikes,
-  getAvgEngagementRate,
   getLastFiftyPictures,
   getDetailsForPicture,
-} from "./AdvancedInformationController";
+  getAvgCommentsAndLikes,
+  getErForPost,
+} from "./PostController";
+import { postsForTags } from "./HashtagController";
 
 const routes = (app: e.Express) => {
-  app.route("/basic-information").get(checkToken, basicInformation);
-  app.route("/new-user/:username").get(newUser);
+  app.route("user/basic-information").get(checkToken, basicInformation);
+  app.route("user/new/:username").get(newUser);
   app.route("/login").post(login);
-  app.route("/delete-user/:username").get(checkToken, deleteUser);
+  app.route("/user/delete/:username").get(checkToken, deleteUser);
   app
-    .route("/advanced-information/get-last-fifty-pictures/:username")
+    .route("/post/get-last-fifty-pictures/:username")
     .get(getLastFiftyPictures);
   app
-    .route("/advanced-information/get-details-for-pictures/:shortcode")
+    .route("/post/get-details-for-pictures/:shortcode")
     .get(getDetailsForPicture);
+  app.route("/user/avg-price-for-ads/:username").get(avgPriceForAds);
   app
-    .route("/advanced-information/avg-price-for-ads/:username")
-    .get(avgPriceForAds);
-  app
-    .route("/advanced-information/avg-likes-and-comments/:username")
+    .route("/post/avg-likes-and-comments/:username")
     .get(getAvgCommentsAndLikes);
-  app
-    .route("/advanced-information/avg-engagementrate/:username")
-    .get(getAvgEngagementRate);
-  app.route("/advanced-information/er-for-post/:username").post(getErForPost);
-  app.route("/basic-information/tags/:username").get(tags);
+  app.route("/user/avg-engagementrate/:username").get(getAvgEngagementRate);
+  app.route("/post/er-for-post/:username").post(getErForPost);
+  app.route("/user/tags/:username").get(tags);
+  app.route("/hashtag/posts-for-tag/:hashtag").get(postsForTags);
 };
 
 export default routes;

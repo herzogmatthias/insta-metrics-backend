@@ -6,7 +6,6 @@ export default interface User {
   following: number;
   avgLikes: number;
   avgComments: number;
-  password: string;
   avgEngagementRate: number;
   avgPriceMin: number;
   avgPriceMax: number;

@@ -1,18 +1,15 @@
-import puppeteer from "puppeteer";
-import fetch, { FetchError, Response } from "node-fetch";
-import { UserRootData } from "../interfaces/InstagramUserData";
 import BasicUserInformation from "../interfaces/BasicUserInformation";
+import { UserRootData } from "../interfaces/InstagramUserData";
 import { BasicStatistics } from "../interfaces/BasicStatistics";
 import {
-  imagga_basic_auth,
   Instagram_Url,
   Instagram_Api_Param,
+  imagga_basic_auth,
 } from "../config";
 import { PostRootData } from "../interfaces/InstagramPostData";
+import fetch, { Response } from "node-fetch";
 
-export class UserInformation {
-  constructor() {}
-
+export default class UserService {
   async getBasicInformation(url: string): Promise<BasicUserInformation> {
     const user = ((await (await fetch(url)).json()) as UserRootData).graphql
       .user;

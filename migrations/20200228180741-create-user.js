@@ -26,9 +26,6 @@ module.exports = {
       avgComments: {
         type: Sequelize.INTEGER,
       },
-      password: {
-        type: Sequelize.STRING,
-      },
       igId: {
         type: Sequelize.STRING,
       },

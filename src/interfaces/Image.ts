@@ -2,9 +2,11 @@ export interface ImageDetails {
   owner: BasicUserInformation;
   id: string;
   likes: number;
+  er: number;
   comments: number;
   caption: string;
   previewComments: Comment[];
+  hashTags: string[];
   images: Image[];
 }
 export interface Comment {

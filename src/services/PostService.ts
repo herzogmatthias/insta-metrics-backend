@@ -1,50 +1,39 @@
-import puppeteer from "puppeteer";
-import { PictureStats } from "../interfaces/PictureStats";
 import UserRepository from "../repositories/userRepository";
-import User from "../interfaces/User";
-import devices from "puppeteer/DeviceDescriptors";
-import fetch from "node-fetch";
-import { getCPMRates } from "./getCPMRates";
 import {
   PostRootData,
   ShortcodeMedia,
-  Edge6,
-  EdgeMediaToTaggedUser2,
   Edge7,
 } from "../interfaces/InstagramPostData";
+import { getCPMRates } from "./getCPMRates";
 import { UserRootData } from "../interfaces/InstagramUserData";
-import { Instagram_Url, query_hash, Instagram_Api_Param } from "../config";
-import { MultiplePostsRootData } from "../interfaces/InstagramMultiplePostsData";
+import { PictureStats } from "../interfaces/PictureStats";
 import {
   ImagePreview,
   ImageDetails,
-  Image,
   BasicUserInformation,
+  Image,
 } from "../interfaces/Image";
-import querystring from "querystring";
-import { UserInformation } from "./UserInformation";
+import fetch from "node-fetch";
+import { Instagram_Url, Instagram_Api_Param, query_hash } from "../config";
+import { MultiplePostsRootData } from "../interfaces/InstagramMultiplePostsData";
+import UserService from "./UserService";
 
-export default class AdvancedInformation {
-  private browser: puppeteer.Browser | undefined;
-  private page: puppeteer.Page | undefined;
-  private constructor() {}
-
-  public static InitAsync = async () => {
-    const ai = new AdvancedInformation();
-    ai.browser = await puppeteer.launch({
-      headless: false,
-    });
-    ai.page = await ai.browser.newPage();
-    await ai.page.emulate(devices["Pixel 2"]);
-    return ai;
-  };
-
-  static async getDetailsForPicture(shortCode: string) {
+export default class PostService {
+  async getDetailsForPicture(shortCode: string) {
     const url = `${Instagram_Url}p/${shortCode}/${Instagram_Api_Param}`;
     const media = ((await (await fetch(url)).json()) as PostRootData).graphql
       .shortcode_media;
+    const er = await this.getErForPost(media.owner.username, shortCode);
+    let hashTags: string[] | undefined = [];
+    if (media.edge_media_to_caption.edges[0]) {
+      hashTags = media.edge_media_to_caption.edges[0].node.text
+        .match(/#\w+/g)
+        ?.map((v) => v.replace("#", ""));
+    }
     const image: ImageDetails = {
       id: shortCode,
+      er: er,
+      hashTags: hashTags ? hashTags : [],
       caption: media.edge_media_to_caption.edges[0]
         ? media.edge_media_to_caption.edges[0].node.text
         : "",
@@ -84,7 +73,7 @@ export default class AdvancedInformation {
     };
     return image;
   }
-  static getImages(media: ShortcodeMedia): Image[] {
+  private getImages(media: ShortcodeMedia): Image[] {
     return media.edge_sidecar_to_children!.edges.map((val) => {
       return {
         isVideo: val.node.is_video,
@@ -98,7 +87,7 @@ export default class AdvancedInformation {
       };
     });
   }
-  static getTaggedUsers(users: Edge7[]): BasicUserInformation[] {
+  private getTaggedUsers(users: Edge7[]): BasicUserInformation[] {
     return users.map((user) => {
       return {
         avatar: user.node.user.profile_pic_url,
@@ -107,10 +96,10 @@ export default class AdvancedInformation {
       };
     });
   }
-  static async getLastFiftyPictures(username: string) {
+  async getLastFiftyPictures(username: string) {
     const [igId, cursor] = await UserRepository.getIgIdAndCursor(username);
-    const ui = new UserInformation();
-    const basic = await ui.getBasicInformation(
+    const userService = new UserService();
+    const basic = await userService.getBasicInformation(
       `${Instagram_Url}${username}/${Instagram_Api_Param}`
     );
     const url = `${Instagram_Url}graphql/query/?query_hash=${query_hash}&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A50%2C%22after%22%3A%22${encodeURIComponent(
@@ -140,7 +129,7 @@ export default class AdvancedInformation {
     return images;
   }
 
-  static async getAvgCommentsAndLikes(url: string) {
+  async getAvgCommentsAndLikes(url: string) {
     let avgComments = 0;
     let avgLikes = 0;
     const response = await fetch(url);
@@ -168,7 +157,7 @@ export default class AdvancedInformation {
         root.graphql.user.edge_owner_to_timeline_media.edges!.length,
     } as PictureStats;
   }
-  static async getAvgEngagementRate(url: string, followers?: number) {
+  async getAvgEngagementRate(url: string, followers?: number) {
     let f;
     if (!followers) {
       f = await UserRepository.getFollowersForUsername(
@@ -202,7 +191,7 @@ export default class AdvancedInformation {
     return ((avgComments + avgLikes) / f) * 100;
   }
 
-  static async getAvgPriceForAds(
+  async getAvgPriceForAds(
     url: string,
     engagementRate?: number,
     followers?: number
@@ -229,9 +218,16 @@ export default class AdvancedInformation {
     return { min: price - price * 0.05, max: price + price * 0.15 };
   }
 
-  static async getErForPost(username: string, id: string) {
-    const followers = await UserRepository.getFollowersForUsername(username);
-    const response = await fetch(`https://www.instagram.com/p/${id}/?__a=1`);
+  async getErForPost(username: string, id: string) {
+    let followers = await UserRepository.getFollowersForUsername(username);
+    if (followers === -1) {
+      followers = ((await (
+        await fetch(`${Instagram_Url}${username}/${Instagram_Api_Param}`)
+      ).json()) as UserRootData).graphql.user.edge_followed_by.count;
+    }
+    const response = await fetch(
+      `${Instagram_Url}p/${id}/${Instagram_Api_Param}`
+    );
     const data = await response.json();
     const imageData: PostRootData = data;
     return (
@@ -240,30 +236,5 @@ export default class AdvancedInformation {
         followers) *
       100
     );
-  }
-
-  private async autoScroll(imageNumber: number) {
-    const delay = 1000;
-    let preCount = 0;
-    let postCount = 0;
-    do {
-      preCount = await this.getCount();
-      await this.scrollDown();
-      await this.page!.waitFor(delay);
-      postCount = await this.getCount();
-    } while (postCount < imageNumber && postCount > preCount);
-  }
-  private async getCount() {
-    return await this.page!.$$eval(".v1Nh3", (a) => a.length);
-  }
-  private async scrollDown() {
-    await this.page!.evaluate(() => {
-      const allItems = document.getElementsByClassName("v1Nh3");
-      console.log(allItems);
-      allItems[allItems.length - 1].scrollIntoView();
-    });
-  }
-  stopBrowser() {
-    this.browser?.close();
   }
 }

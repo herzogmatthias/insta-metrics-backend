@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
       following: DataTypes.NUMBER,
       avgLikes: DataTypes.NUMBER,
       avgComments: DataTypes.NUMBER,
-      password: DataTypes.STRING,
       avgEngagementRate: DataTypes.DECIMAL,
       avgPriceMin: DataTypes.DECIMAL,
       avgPriceMax: DataTypes.DECIMAL,
