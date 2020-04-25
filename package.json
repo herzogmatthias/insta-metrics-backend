@@ -29,7 +29,6 @@
     "@types/morgan": "^1.7.37",
     "@types/node-fetch": "^2.5.4",
     "@types/sequelize": "^4.28.8",
-    "dotenv": "^8.2.0",
     "rimraf": "^3.0.2",
     "typescript": "^3.7.5"
   }
