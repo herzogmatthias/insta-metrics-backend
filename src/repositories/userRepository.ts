@@ -1,5 +1,4 @@
 import User from "../interfaces/User";
-
 var db = require("../../models/index");
 var User = db.sequelize.import("../../models/user");
 
