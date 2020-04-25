@@ -31,6 +31,7 @@ export interface ImagePreview {
   comments: number;
   caption: string;
   timeStamp: number;
+  er: number;
   imageUrl: string;
   avatarUrl: string;
   author: string;

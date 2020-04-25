@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       avgEngagementRate: DataTypes.DECIMAL,
       avgPriceMin: DataTypes.DECIMAL,
       avgPriceMax: DataTypes.DECIMAL,
+      isBot: DataTypes.BOOLEAN,
     },
     {}
   );

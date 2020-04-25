@@ -29,6 +29,9 @@ module.exports = {
       igId: {
         type: Sequelize.STRING,
       },
+      isBot: {
+        type: Sequelize.BOOLEAN,
+      },
       cursor: {
         type: Sequelize.STRING,
       },

@@ -10,6 +10,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "pretty": true,
+    "outDir": "build",
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,

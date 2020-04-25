@@ -11,4 +11,5 @@ export default interface User {
   avgPriceMax: number;
   cursor: string;
   igId: string;
+  isBot: boolean;
 }

@@ -9,7 +9,7 @@ import UserService from "../services/UserService";
 import PostService from "../services/PostService";
 
 export const newUser = async (req: e.Request, res: e.Response) => {
-  const postService = new PostService();
+  const isBot = req.query.isBot;
   const URI = `${Instagram_Url}${req.params.username}/${Instagram_Api_Param}`;
   const validUsername = await checkUserName(req.params.username);
   if (!validUsername) {
@@ -26,36 +26,18 @@ export const newUser = async (req: e.Request, res: e.Response) => {
     return;
   }
   const userService = new UserService();
-  const basicStats = await userService.getBasicStats(URI);
-  const [id, cursor] = await userService.getIgIdandCursor(URI);
-  const avgStats = await postService.getAvgCommentsAndLikes(URI);
-  const avgER = await postService.getAvgEngagementRate(
-    URI,
-    basicStats.followers
-  );
-  console.log(avgER);
-  const avgAdPrice = await postService.getAvgPriceForAds(
-    URI,
-    avgER,
-    basicStats.followers
-  );
-  let user: User = {
-    userName: req.params.username,
-    followers: basicStats.followers,
-    following: basicStats.following,
-    posts: basicStats.posts,
-    cursor: cursor!,
-    igId: id!,
-    avgComments: avgStats.comments,
-    avgLikes: avgStats.likes,
-    avgEngagementRate: avgER,
-    avgPriceMin: avgAdPrice.min,
-    avgPriceMax: avgAdPrice.max,
-  };
-  console.log(user);
+  const user = await userService.getUserData(req.params.username, URI, isBot);
   const basicInformation = await userService.getBasicInformation(URI);
   UserRepository.addUser(user);
   res.json({ error: false, text: "New User added!", basicInformation });
+};
+export const avgCommentsAndLikes = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username as string;
+  const userService = new UserService();
+  const avgStats = await userService.getAvgCommentsAndLikes(
+    `${Instagram_Url}${username}/`
+  );
+  res.json(avgStats);
 };
 
 export const deleteUser = async (req: e.Request, res: e.Response) => {
@@ -68,6 +50,15 @@ export const basicInformation = async (req: e.Request, res: e.Response) => {
   const userService = new UserService();
   let userData: BasicUserInformation[] = [];
   for (const user of users) {
+    userService
+      .getUserData(
+        user.userName,
+        `${Instagram_Url}${user.userName}/${Instagram_Api_Param}`,
+        false
+      )
+      .then((val) => {
+        UserRepository.updateUser(val);
+      });
     const userInfo: BasicUserInformation = await userService.getBasicInformation(
       `${Instagram_Url}${user.userName}/${Instagram_Api_Param}`
     );

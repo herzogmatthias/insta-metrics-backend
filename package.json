@@ -5,7 +5,9 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts"
+    "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts",
+    "build": "rimraf ./build && tsc && npm run start:production",
+    "start:production": "NODE_ENV=production node ./build/index.js "
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +29,7 @@
     "@types/morgan": "^1.7.37",
     "@types/node-fetch": "^2.5.4",
     "@types/sequelize": "^4.28.8",
+    "rimraf": "^3.0.2",
     "typescript": "^3.7.5"
   }
 }

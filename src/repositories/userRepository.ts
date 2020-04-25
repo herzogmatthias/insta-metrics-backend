@@ -24,6 +24,30 @@ export default class UserRepository {
       },
     });
   }
+  static updateUser(user: User) {
+    console.log(User);
+    User.findOne({
+      where: {
+        userName: user.userName,
+      },
+    }).then((u: any) => {
+      if (u) {
+        u.update({
+          userName: user.userName,
+          avgPriceMax: user.avgPriceMax,
+          avgPriceMin: user.avgPriceMin,
+          avgComments: user.avgComments,
+          avgLikes: user.avgLikes,
+          avgEngagementRate: user.avgEngagementRate,
+          cursor: user.cursor,
+          igId: user.igId,
+          posts: user.posts,
+          followers: user.followers,
+          following: user.following,
+        } as User);
+      }
+    });
+  }
 
   static findUser(username: string) {
     return new Promise((res, rej) => {
