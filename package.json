@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts",
-    "build": "rimraf ./build && tsc && npm run start:production",
+    "build": "rimraf ./build && tsc",
     "start:production": "NODE_ENV=production node ./build/index.js "
   },
   "author": "",
