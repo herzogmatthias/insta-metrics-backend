@@ -1,11 +1,7 @@
 import BasicUserInformation from "../interfaces/BasicUserInformation";
 import { UserRootData } from "../interfaces/InstagramUserData";
 import { BasicStatistics } from "../interfaces/BasicStatistics";
-import {
-  Instagram_Url,
-  Instagram_Api_Param,
-  imagga_basic_auth,
-} from "../config";
+import { Instagram_Url, Instagram_Api_Param } from "../config";
 import { PostRootData } from "../interfaces/InstagramPostData";
 import fetch, { Response } from "node-fetch";
 import { PictureStats } from "../interfaces/PictureStats";
@@ -90,7 +86,7 @@ export default class UserService {
             encodeURIComponent(pictures[i].node.display_url),
           {
             headers: {
-              Authorization: imagga_basic_auth,
+              Authorization: process.env.imagga_basic_auth!,
             },
           }
         )

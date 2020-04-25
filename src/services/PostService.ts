@@ -13,7 +13,7 @@ import {
   Image,
 } from "../interfaces/Image";
 import fetch from "node-fetch";
-import { Instagram_Url, Instagram_Api_Param, query_hash } from "../config";
+import { Instagram_Url, Instagram_Api_Param } from "../config";
 import { MultiplePostsRootData } from "../interfaces/InstagramMultiplePostsData";
 import UserService from "./UserService";
 import { Ranking } from "../interfaces/Ranking";
@@ -111,7 +111,9 @@ export default class PostService {
     const [igId, cursor] = [...data[0]];
     const followers = data[1];
     const basic = data[2];
-    const url = `${Instagram_Url}graphql/query/?query_hash=${query_hash}&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A50%2C%22after%22%3A%22${encodeURIComponent(
+    const url = `${Instagram_Url}graphql/query/?query_hash=${
+      process.env.query_hash
+    }&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A50%2C%22after%22%3A%22${encodeURIComponent(
       cursor
     )}%22%7D`;
     const media = ((await (await fetch(url)).json()) as MultiplePostsRootData)
