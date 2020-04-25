@@ -1,5 +1,4 @@
 import e from "express";
-import { Instagram_Url } from "../config";
 import PostService from "../services/PostService";
 
 export const lastFiftyPictures = async (req: e.Request, res: e.Response) => {

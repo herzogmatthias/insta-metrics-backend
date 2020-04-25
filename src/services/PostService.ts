@@ -6,7 +6,6 @@ import {
 } from "../interfaces/InstagramPostData";
 import { getCPMRates } from "./getCPMRates";
 import { UserRootData } from "../interfaces/InstagramUserData";
-import { PictureStats } from "../interfaces/PictureStats";
 import {
   ImagePreview,
   ImageDetails,
