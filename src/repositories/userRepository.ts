@@ -48,7 +48,7 @@ export default class UserRepository {
     });
   }
 
-  static findUser(username: string) {
+  static findUser(username: string): Promise<User> {
     return new Promise((res, rej) => {
       User.findOne({
         where: {
@@ -93,8 +93,8 @@ export default class UserRepository {
         },
       }).then((user: any) => {
         res([
-          (user.get({ plain: true }) as User).igId,
-          (user.get({ plain: true }) as User).cursor,
+          (user.get({ plain: true }) as User).igId!,
+          (user.get({ plain: true }) as User).cursor!,
         ]);
       });
     });

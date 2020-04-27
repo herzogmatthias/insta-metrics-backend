@@ -1,6 +1,7 @@
 export default interface User {
   id?: number;
   userName: string;
+  name?: string;
   posts: number;
   followers: number;
   following: number;
@@ -9,7 +10,9 @@ export default interface User {
   avgEngagementRate: number;
   avgPriceMin: number;
   avgPriceMax: number;
-  cursor: string;
-  igId: string;
-  isBot: boolean;
+  cursor?: string;
+  igId?: string;
+  isBot?: boolean;
+  description?: string;
+  avatar?: string;
 }

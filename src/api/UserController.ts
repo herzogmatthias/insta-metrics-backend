@@ -39,6 +39,12 @@ export const avgCommentsAndLikes = async (req: e.Request, res: e.Response) => {
   );
   res.json(avgStats);
 };
+export const generalInformation = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username as string;
+  const userService = new UserService();
+  const user = await userService.getGeneralInformation(username);
+  res.json(user);
+};
 
 export const deleteUser = async (req: e.Request, res: e.Response) => {
   const username = req.params.username;

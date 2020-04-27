@@ -8,16 +8,29 @@ import { PictureStats } from "../interfaces/PictureStats";
 import { Tag } from "../interfaces/Tag";
 import PostService from "./PostService";
 import User from "../interfaces/User";
+import UserRepository from "../repositories/userRepository";
 
 export default class UserService {
-  async getBasicInformation(url: string): Promise<BasicUserInformation> {
+  async getBasicInformation(
+    url: string,
+    withDescription: boolean = false
+  ): Promise<BasicUserInformation> {
     const user = ((await (await fetch(url)).json()) as UserRootData).graphql
       .user;
-    return {
-      avatar: user.profile_pic_url,
-      name: user.full_name,
-      username: user.username,
-    };
+    if (withDescription) {
+      return {
+        avatar: user.profile_pic_url,
+        name: user.full_name,
+        username: user.username,
+        description: user.biography,
+      };
+    } else {
+      return {
+        avatar: user.profile_pic_url,
+        name: user.full_name,
+        username: user.username,
+      };
+    }
   }
   async getBasicStats(url: string): Promise<BasicStatistics> {
     const user = ((await (await fetch(url)).json()) as UserRootData).graphql
@@ -100,6 +113,17 @@ export default class UserService {
     }
 
     return tags.sort((a, b) => b.confidence - a.confidence).splice(0, 5);
+  }
+  async getGeneralInformation(username: string) {
+    const user = await UserRepository.findUser(username);
+    const basic = await this.getBasicInformation(
+      `${Instagram_Url}${username}/${Instagram_Api_Param}`,
+      true
+    );
+    user.description = basic.description!;
+    user.avatar = basic.avatar;
+    user.name = basic.name;
+    return user;
   }
   async getUserData(username: string, URI: string, isBot: boolean) {
     const postService = new PostService();

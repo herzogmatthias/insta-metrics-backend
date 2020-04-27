@@ -39,6 +39,7 @@ const routes = (app: e.Express) => {
   app
     .route("/user/avg-engagementrate/:username")
     .get(checkToken, getAvgEngagementRate);
+  app.route("/user/general-information/:username").get(checkToken);
   app.route("/post/er-for-post/:username").post(checkToken, erForPost);
   app.route("/user/tags/:username").get(checkToken, tags);
   app.route("/hashtag/posts-for-tag/:hashtag").get(checkToken, postsForTags);
