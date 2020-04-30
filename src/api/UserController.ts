@@ -46,6 +46,13 @@ export const generalInformation = async (req: e.Request, res: e.Response) => {
   res.json(user);
 };
 
+export const graphData = async (req: e.Request, res: e.Response) => {
+  const username = req.params.username as string;
+  const userService = new UserService();
+  const graphData = await userService.getGraphData(username);
+  res.json(graphData);
+};
+
 export const deleteUser = async (req: e.Request, res: e.Response) => {
   const username = req.params.username;
   UserRepository.deleteUser(username);

@@ -125,6 +125,30 @@ export default class UserService {
     user.name = basic.name;
     return user;
   }
+  async getGraphData(username: string) {
+    const postService = new PostService();
+    const images = await postService.getLastFiftyPictures(username);
+    return [
+      {
+        header: "Engagement Rate",
+        chart: images.map((i) => {
+          return { name: i.id, data: i.er };
+        }),
+      },
+      {
+        header: "Likes",
+        chart: images.map((i) => {
+          return { name: i.id, data: i.likes };
+        }),
+      },
+      {
+        header: "Comments",
+        chart: images.map((i) => {
+          return { name: i.id, data: i.comments };
+        }),
+      },
+    ];
+  }
   async getUserData(username: string, URI: string, isBot: boolean) {
     const postService = new PostService();
     const basicStats = await this.getBasicStats(URI);
