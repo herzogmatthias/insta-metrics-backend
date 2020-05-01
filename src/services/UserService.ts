@@ -128,6 +128,7 @@ export default class UserService {
   async getGraphData(username: string) {
     const postService = new PostService();
     const images = await postService.getLastFiftyPictures(username);
+    images.sort((a, b) => a.timeStamp - b.timeStamp);
     return [
       {
         header: "Engagement Rate",
