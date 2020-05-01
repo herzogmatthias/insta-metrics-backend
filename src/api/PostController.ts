@@ -5,7 +5,7 @@ export const lastFiftyPictures = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
   const postService = new PostService();
   const images = await postService.getLastFiftyPictures(username);
-  images.sort((a, b) => a.timeStamp - b.timeStamp);
+  images.sort((a, b) => b.timeStamp - a.timeStamp);
   res.json(images);
 };
 export const detailsForPicture = async (req: e.Request, res: e.Response) => {
