@@ -201,7 +201,7 @@ export default class PostService {
     }
     const price = (f / 1000) * cpmValue;
 
-    return { min: price - price * 0.15, max: price + price * 0.5 };
+    return { min: price - price * 0.2, max: price + price * 0.05 };
   }
 
   async getRankingsForPost(shortCode: string) {

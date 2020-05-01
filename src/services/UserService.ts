@@ -132,19 +132,19 @@ export default class UserService {
       {
         header: "Engagement Rate",
         chart: images.map((i) => {
-          return { name: i.id, data: i.er };
+          return { name: i.timeStamp, data: i.er };
         }),
       },
       {
         header: "Likes",
         chart: images.map((i) => {
-          return { name: i.id, data: i.likes };
+          return { name: i.timeStamp, data: i.likes };
         }),
       },
       {
         header: "Comments",
         chart: images.map((i) => {
-          return { name: i.id, data: i.comments };
+          return { name: i.timeStamp, data: i.comments };
         }),
       },
     ];
