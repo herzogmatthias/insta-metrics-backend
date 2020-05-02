@@ -3,6 +3,7 @@ export interface ImageDetails {
   id: string;
   likes: number;
   er: number;
+  timeStamp: number;
   comments: number;
   caption: string;
   previewComments: Comment[];

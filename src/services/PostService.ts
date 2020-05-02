@@ -33,6 +33,7 @@ export default class PostService {
     const image: ImageDetails = {
       id: shortCode,
       er: er,
+      timeStamp: media.taken_at_timestamp,
       hashTags: hashTags ? hashTags : [],
       caption: media.edge_media_to_caption.edges[0]
         ? media.edge_media_to_caption.edges[0].node.text
