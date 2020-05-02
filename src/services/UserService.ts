@@ -15,8 +15,10 @@ export default class UserService {
     url: string,
     withDescription: boolean = false
   ): Promise<BasicUserInformation> {
-    const user = ((await (await fetch(url)).json()) as UserRootData).graphql
-      .user;
+    const response = await fetch(url);
+    console.log(response);
+    const data = await response.json();
+    const user = data.graphql.user;
     if (withDescription) {
       return {
         avatar: user.profile_pic_url,
