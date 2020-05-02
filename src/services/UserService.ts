@@ -33,6 +33,7 @@ export default class UserService {
     }
   }
   async getBasicStats(url: string): Promise<BasicStatistics> {
+    console.log(url);
     const user = ((await (await fetch(url)).json()) as UserRootData).graphql
       .user;
     return {
