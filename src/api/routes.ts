@@ -30,7 +30,7 @@ const routes = (app: e.Express) => {
     .route("/post/last-fifty-pictures/:username")
     .get(checkToken, lastFiftyPictures);
   app
-    .route("/post/get-details-for-pictures/:shortcode")
+    .route("/post/details-for-pictures/:shortcode")
     .get(checkToken, detailsForPicture);
   app
     .route("/user/avg-price-for-ads/:username")
