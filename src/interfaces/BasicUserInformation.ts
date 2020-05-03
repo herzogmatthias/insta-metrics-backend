@@ -3,4 +3,5 @@ export default interface BasicUserInformation {
   name: string;
   avatar: string;
   description?: string;
+  isBot?: boolean;
 }

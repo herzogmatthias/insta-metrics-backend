@@ -19,18 +19,21 @@ export default class UserService {
     console.log(response);
     const data = await response.json();
     const user = data.graphql.user;
+    const u = await UserRepository.findUser(user.username);
     if (withDescription) {
       return {
         avatar: user.profile_pic_url,
         name: user.full_name,
         username: user.username,
         description: user.biography,
+        isBot: u.isBot,
       };
     } else {
       return {
         avatar: user.profile_pic_url,
         name: user.full_name,
         username: user.username,
+        isBot: u.isBot,
       };
     }
   }
