@@ -9,38 +9,52 @@ import { Tag } from "../interfaces/Tag";
 import PostService from "./PostService";
 import User from "../interfaces/User";
 import UserRepository from "../repositories/userRepository";
+import Error from "../interfaces/Error";
+import { ImagePreview } from "../interfaces/Image";
 
 export default class UserService {
   async getBasicInformation(
     url: string,
     isBot?: boolean,
     withDescription: boolean = false
-  ): Promise<BasicUserInformation> {
+  ): Promise<BasicUserInformation | Error> {
     console.log(isBot);
     const response = await fetch(url);
     console.log(response);
-    const data = await response.json();
-    const user = data.graphql.user;
-    let u: User | undefined = undefined;
-    if (isBot === undefined) {
-      u = await UserRepository.findUser(user.username);
-    }
+    try {
+      const data = await response.json();
+      const user = data.graphql.user;
+      let u: User | undefined = undefined;
+      if (isBot === undefined) {
+        u = await UserRepository.findUser(user.username);
+      }
 
-    if (withDescription) {
-      return {
-        avatar: user.profile_pic_url,
-        name: user.full_name,
-        username: user.username,
-        description: user.biography,
-        isBot: isBot === undefined ? u!.isBot : isBot,
-      };
-    } else {
-      return {
-        avatar: user.profile_pic_url,
-        name: user.full_name,
-        username: user.username,
-        isBot: isBot === undefined ? u!.isBot : isBot,
-      };
+      if (withDescription) {
+        return {
+          avatar: user.profile_pic_url,
+          name: user.full_name,
+          username: user.username,
+          description: user.biography,
+          isBot: isBot === undefined ? u!.isBot : isBot,
+        };
+      } else {
+        return {
+          avatar: user.profile_pic_url,
+          name: user.full_name,
+          username: user.username,
+          isBot: isBot === undefined ? u!.isBot : isBot,
+        };
+      }
+    } catch {
+      fetch("https://api.heroku.com/app/insta-metrics/dynos", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/vnd.heroku+json; version=3",
+          Authorization: "Bearer " + process.env.heroku_api_key,
+        },
+      });
+      return { error: true, text: "Restarting Dynos" };
     }
   }
   async getBasicStats(url: string): Promise<BasicStatistics> {
@@ -126,40 +140,50 @@ export default class UserService {
   }
   async getGeneralInformation(username: string) {
     const user = await UserRepository.findUser(username);
-    const basic = await this.getBasicInformation(
+    let basic = await this.getBasicInformation(
       `${Instagram_Url}${username}/${Instagram_Api_Param}`,
       undefined,
       true
     );
-    user.description = basic.description!;
-    user.avatar = basic.avatar;
-    user.name = basic.name;
-    return user;
+    if ((basic as BasicUserInformation).avatar) {
+      basic = basic as BasicUserInformation;
+      user.description = basic.description!;
+      user.avatar = basic.avatar;
+      user.name = basic.name;
+      return user;
+    } else {
+      return basic as Error;
+    }
   }
   async getGraphData(username: string) {
     const postService = new PostService();
-    const images = await postService.getLastFiftyPictures(username);
-    images.sort((a, b) => a.timeStamp - b.timeStamp);
-    return [
-      {
-        header: "Engagement Rate",
-        chart: images.map((i) => {
-          return { name: i.timeStamp, data: i.er };
-        }),
-      },
-      {
-        header: "Likes",
-        chart: images.map((i) => {
-          return { name: i.timeStamp, data: i.likes };
-        }),
-      },
-      {
-        header: "Comments",
-        chart: images.map((i) => {
-          return { name: i.timeStamp, data: i.comments };
-        }),
-      },
-    ];
+    let images = await postService.getLastFiftyPictures(username);
+    if ((images as Error).text) {
+      return images as Error;
+    } else {
+      images = images as ImagePreview[];
+      images.sort((a, b) => a.timeStamp - b.timeStamp);
+      return [
+        {
+          header: "Engagement Rate",
+          chart: images.map((i) => {
+            return { name: i.timeStamp, data: i.er };
+          }),
+        },
+        {
+          header: "Likes",
+          chart: images.map((i) => {
+            return { name: i.timeStamp, data: i.likes };
+          }),
+        },
+        {
+          header: "Comments",
+          chart: images.map((i) => {
+            return { name: i.timeStamp, data: i.comments };
+          }),
+        },
+      ];
+    }
   }
   async getUserData(username: string, URI: string, isBot: boolean) {
     const postService = new PostService();

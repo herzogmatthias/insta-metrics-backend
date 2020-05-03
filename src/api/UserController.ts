@@ -73,11 +73,17 @@ export const basicInformation = async (req: e.Request, res: e.Response) => {
       .then((val) => {
         UserRepository.updateUser(val);
       });
-    const userInfo: BasicUserInformation = await userService.getBasicInformation(
+    const userInfo:
+      | BasicUserInformation
+      | Error = await userService.getBasicInformation(
       `${Instagram_Url}${user.userName}/${Instagram_Api_Param}`
     );
-
-    userData.push(userInfo);
+    if ((userInfo as Error).text) {
+      res.status(500).send(userInfo);
+      break;
+    } else {
+      userData.push(userInfo as BasicUserInformation);
+    }
   }
   res.send(userData);
 };

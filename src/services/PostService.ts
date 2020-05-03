@@ -21,6 +21,7 @@ import {
 import UserService from "./UserService";
 import { Ranking } from "../interfaces/Ranking";
 import HashtagService from "./HashtagService";
+import Error from "../interfaces/Error";
 
 export default class PostService {
   async getDetailsForPicture(shortCode: string) {
@@ -127,46 +128,54 @@ export default class PostService {
     const [igId, cursor] = [...data[0]];
     const followers = data[1];
     const basic = data[2];
-    let media = ((await (
-      await fetch(`${Instagram_Url}${username}/${Instagram_Api_Param}`)
-    ).json()) as UserRootData).graphql.user.edge_owner_to_timeline_media
-      .edges as Edge[];
-    if (cursor) {
-      const url = `${Instagram_Url}graphql/query/?query_hash=${
-        process.env.query_hash
-      }&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A40%2C%22after%22%3A%22${encodeURIComponent(
-        cursor
-      )}%22%7D`;
-      const cursorImages = ((await (
-        await fetch(url)
-      ).json()) as MultiplePostsRootData).data.user.edge_owner_to_timeline_media
-        .edges;
-      media = cursorImages.concat(media);
+    if ((basic as Error).text) {
+      return basic as Error;
+    } else {
+      let media = ((await (
+        await fetch(`${Instagram_Url}${username}/${Instagram_Api_Param}`)
+      ).json()) as UserRootData).graphql.user.edge_owner_to_timeline_media
+        .edges as Edge[];
+      if (cursor) {
+        const url = `${Instagram_Url}graphql/query/?query_hash=${
+          process.env.query_hash
+        }&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A40%2C%22after%22%3A%22${encodeURIComponent(
+          cursor
+        )}%22%7D`;
+        const cursorImages = ((await (
+          await fetch(url)
+        ).json()) as MultiplePostsRootData).data.user
+          .edge_owner_to_timeline_media.edges;
+        media = cursorImages.concat(media);
+      }
+
+      let images: ImagePreview[] = [];
+
+      await Promise.all(
+        media.map(async (val, ind) => {
+          const image: ImagePreview = {
+            id: val.node.shortcode,
+            er: await this.getErForPost(
+              username,
+              val.node.shortcode,
+              followers
+            ),
+            caption: val.node.edge_media_to_caption.edges[0]
+              ? val.node.edge_media_to_caption.edges[0].node.text
+              : "",
+            likes: val.node.edge_media_preview_like.count,
+            comments: val.node.edge_media_to_comment.count,
+            author: (basic as BasicUserInformation).name,
+            avatarUrl: (basic as BasicUserInformation).avatar,
+            imageUrl: val.node.display_url,
+            timeStamp: val.node.taken_at_timestamp,
+            isVideo: val.node.is_video,
+            multipleViews: val.node.edge_sidecar_to_children ? true : false,
+          };
+          images.push(image);
+        })
+      );
+      return images;
     }
-
-    let images: ImagePreview[] = [];
-
-    await Promise.all(
-      media.map(async (val, ind) => {
-        const image: ImagePreview = {
-          id: val.node.shortcode,
-          er: await this.getErForPost(username, val.node.shortcode, followers),
-          caption: val.node.edge_media_to_caption.edges[0]
-            ? val.node.edge_media_to_caption.edges[0].node.text
-            : "",
-          likes: val.node.edge_media_preview_like.count,
-          comments: val.node.edge_media_to_comment.count,
-          author: basic.name,
-          avatarUrl: basic.avatar,
-          imageUrl: val.node.display_url,
-          timeStamp: val.node.taken_at_timestamp,
-          isVideo: val.node.is_video,
-          multipleViews: val.node.edge_sidecar_to_children ? true : false,
-        };
-        images.push(image);
-      })
-    );
-    return images;
   }
 
   async getAvgEngagementRate(url: string, followers?: number) {
@@ -237,16 +246,21 @@ export default class PostService {
 
     const username = media.owner.username;
     const er = await this.getErForPost(username, shortCode);
-    const images = await this.getLastFiftyPictures(username);
-    return [
-      this.getRank(images, "likes", media.edge_media_preview_like.count),
-      this.getRank(
-        images,
-        "comments",
-        media.edge_media_to_parent_comment.count
-      ),
-      this.getRank(images, "er", er),
-    ];
+    let images = await this.getLastFiftyPictures(username);
+    if ((images as Error).text) {
+      return images as Error;
+    } else {
+      images = images as ImagePreview[];
+      return [
+        this.getRank(images, "likes", media.edge_media_preview_like.count),
+        this.getRank(
+          images,
+          "comments",
+          media.edge_media_to_parent_comment.count
+        ),
+        this.getRank(images, "er", er),
+      ];
+    }
   }
 
   private getRank(
