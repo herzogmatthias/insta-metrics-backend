@@ -9,7 +9,7 @@ import UserService from "../services/UserService";
 import PostService from "../services/PostService";
 
 export const newUser = async (req: e.Request, res: e.Response) => {
-  const isBot = req.query.isBot;
+  const isBot = req.query.isBot as boolean;
   const URI = `${Instagram_Url}${req.params.username}/${Instagram_Api_Param}`;
   const validUsername = await checkUserName(req.params.username);
   if (!validUsername) {
@@ -27,7 +27,8 @@ export const newUser = async (req: e.Request, res: e.Response) => {
   }
   const userService = new UserService();
   const user = await userService.getUserData(req.params.username, URI, isBot);
-  const basicInformation = await userService.getBasicInformation(URI);
+  console.log(user);
+  const basicInformation = await userService.getBasicInformation(URI, isBot);
   UserRepository.addUser(user);
   res.json({ error: false, text: "New User added!", basicInformation });
 };

@@ -1,3 +1,10 @@
+import {
+  EdgeMediaToSponsorUser,
+  DisplayResource,
+  EdgeMediaToTaggedUser,
+  DashInfo,
+} from "./InstagramMultiplePostsData";
+
 export interface UserRootData {
   logging_page_id: string;
   show_suggested_profiles: boolean;
@@ -172,26 +179,35 @@ export interface Edge4 {
 export interface Node4 {
   __typename: string;
   id: string;
-  shortcode: string;
-  dimensions: Dimensions2;
+  dimensions: Dimensions;
   display_url: string;
+  display_resources: DisplayResource[];
+  is_video: boolean;
+  tracking_token: string;
+  edge_media_to_tagged_user: EdgeMediaToTaggedUser;
+  accessibility_caption: any;
+  edge_media_to_caption: EdgeMediaToCaption;
+  shortcode: string;
+  edge_media_to_comment: EdgeMediaToComment;
+  edge_media_to_sponsor_user: EdgeMediaToSponsorUser;
+  comments_disabled: boolean;
+  taken_at_timestamp: number;
+  edge_media_preview_like: EdgeMediaPreviewLike;
   gating_info: any;
   fact_check_overall_rating: any;
   fact_check_information: any;
   media_preview?: string;
   owner: Owner2;
-  is_video: boolean;
-  accessibility_caption?: string;
-  edge_media_to_caption: EdgeMediaToCaption2;
-  edge_media_to_comment: EdgeMediaToComment2;
-  comments_disabled: boolean;
-  taken_at_timestamp: number;
-  edge_liked_by: EdgeLikedBy2;
-  edge_media_preview_like: EdgeMediaPreviewLike2;
   location: any;
+  viewer_has_liked: boolean;
+  viewer_has_saved: boolean;
+  viewer_has_saved_to_collection: boolean;
+  viewer_in_photo_of_you: boolean;
+  viewer_can_reshare: boolean;
   thumbnail_src: string;
-  thumbnail_resources: ThumbnailResource2[];
-  felix_profile_grid_crop: any;
+  thumbnail_resources: ThumbnailResource[];
+  dash_info?: DashInfo;
+  video_url?: string;
   video_view_count?: number;
   edge_sidecar_to_children?: EdgeSidecarToChildren;
 }

@@ -14,7 +14,10 @@ import {
 } from "../interfaces/Image";
 import fetch from "node-fetch";
 import { Instagram_Url, Instagram_Api_Param } from "../config";
-import { MultiplePostsRootData } from "../interfaces/InstagramMultiplePostsData";
+import {
+  MultiplePostsRootData,
+  Edge,
+} from "../interfaces/InstagramMultiplePostsData";
 import UserService from "./UserService";
 import { Ranking } from "../interfaces/Ranking";
 
@@ -112,13 +115,23 @@ export default class PostService {
     const [igId, cursor] = [...data[0]];
     const followers = data[1];
     const basic = data[2];
-    const url = `${Instagram_Url}graphql/query/?query_hash=${
-      process.env.query_hash
-    }&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A50%2C%22after%22%3A%22${encodeURIComponent(
-      cursor
-    )}%22%7D`;
-    const media = ((await (await fetch(url)).json()) as MultiplePostsRootData)
-      .data.user.edge_owner_to_timeline_media.edges;
+    let media = ((await (
+      await fetch(`${Instagram_Url}${username}/${Instagram_Api_Param}`)
+    ).json()) as UserRootData).graphql.user.edge_owner_to_timeline_media
+      .edges as Edge[];
+    if (cursor) {
+      const url = `${Instagram_Url}graphql/query/?query_hash=${
+        process.env.query_hash
+      }&variables=%7B%22id%22%3A"${igId}%22%2C%22first%22%3A40%2C%22after%22%3A%22${encodeURIComponent(
+        cursor
+      )}%22%7D`;
+      const cursorImages = ((await (
+        await fetch(url)
+      ).json()) as MultiplePostsRootData).data.user.edge_owner_to_timeline_media
+        .edges;
+      media = cursorImages.concat(media);
+    }
+
     let images: ImagePreview[] = [];
 
     await Promise.all(

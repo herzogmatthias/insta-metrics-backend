@@ -13,27 +13,33 @@ import UserRepository from "../repositories/userRepository";
 export default class UserService {
   async getBasicInformation(
     url: string,
+    isBot?: boolean,
     withDescription: boolean = false
   ): Promise<BasicUserInformation> {
+    console.log(isBot);
     const response = await fetch(url);
     console.log(response);
     const data = await response.json();
     const user = data.graphql.user;
-    const u = await UserRepository.findUser(user.username);
+    let u: User | undefined = undefined;
+    if (isBot === undefined) {
+      u = await UserRepository.findUser(user.username);
+    }
+
     if (withDescription) {
       return {
         avatar: user.profile_pic_url,
         name: user.full_name,
         username: user.username,
         description: user.biography,
-        isBot: u.isBot,
+        isBot: isBot === undefined ? u!.isBot : isBot,
       };
     } else {
       return {
         avatar: user.profile_pic_url,
         name: user.full_name,
         username: user.username,
-        isBot: u.isBot,
+        isBot: isBot === undefined ? u!.isBot : isBot,
       };
     }
   }
@@ -52,12 +58,10 @@ export default class UserService {
     const data = ((await (await fetch(url)).json()) as UserRootData).graphql
       .user;
     const id = data.id;
-    const firstShortCode =
-      data.edge_owner_to_timeline_media.edges[0].node.shortcode;
-    const picture = ((await (
-      await fetch(`${Instagram_Url}p/${firstShortCode}/${Instagram_Api_Param}`)
-    ).json()) as PostRootData).graphql.shortcode_media;
-    const cursor = picture.edge_media_to_parent_comment.page_info.end_cursor;
+    const cursor = data.edge_owner_to_timeline_media.page_info.has_next_page
+      ? data.edge_owner_to_timeline_media.page_info.end_cursor
+      : null;
+
     return [id, cursor];
   }
 
@@ -124,6 +128,7 @@ export default class UserService {
     const user = await UserRepository.findUser(username);
     const basic = await this.getBasicInformation(
       `${Instagram_Url}${username}/${Instagram_Api_Param}`,
+      undefined,
       true
     );
     user.description = basic.description!;
