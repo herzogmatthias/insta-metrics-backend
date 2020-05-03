@@ -46,14 +46,18 @@ export default class UserService {
         };
       }
     } catch {
-      fetch("https://api.heroku.com/app/insta-metrics/dynos", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/vnd.heroku+json; version=3",
-          Authorization: "Bearer " + process.env.heroku_api_key,
-        },
-      });
+      const restart = await fetch(
+        "https://api.heroku.com/app/insta-metrics/dynos",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/vnd.heroku+json; version=3",
+            Authorization: "Bearer " + process.env.heroku_api_key,
+          },
+        }
+      );
+      console.log(restart);
       return { error: true, text: "Restarting Dynos" };
     }
   }
