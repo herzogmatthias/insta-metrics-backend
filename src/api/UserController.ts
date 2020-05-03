@@ -63,6 +63,7 @@ export const basicInformation = async (req: e.Request, res: e.Response) => {
   const users = (await UserRepository.getAllUsers()) as User[];
   const userService = new UserService();
   let userData: BasicUserInformation[] = [];
+  let error = false;
   for (const user of users) {
     userService
       .getUserData(
@@ -80,12 +81,15 @@ export const basicInformation = async (req: e.Request, res: e.Response) => {
     );
     if ((userInfo as Error).text) {
       res.status(500).send(userInfo);
+      error = true;
       break;
     } else {
       userData.push(userInfo as BasicUserInformation);
     }
   }
-  res.send(userData);
+  if (!error) {
+    res.send(userData);
+  }
 };
 export const tags = async (req: e.Request, res: e.Response) => {
   const username = req.params.username;
