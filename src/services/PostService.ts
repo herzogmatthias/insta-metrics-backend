@@ -20,6 +20,7 @@ import {
 } from "../interfaces/InstagramMultiplePostsData";
 import UserService from "./UserService";
 import { Ranking } from "../interfaces/Ranking";
+import HashtagService from "./HashtagService";
 
 export default class PostService {
   async getDetailsForPicture(shortCode: string) {
@@ -33,11 +34,22 @@ export default class PostService {
         .match(/#\w+/g)
         ?.map((v) => v.replace("#", ""));
     }
+    const hashtagService = new HashtagService();
+    const hashTagsWithPosts = await Promise.all(
+      hashTags!.map(async (val) => {
+        return {
+          name: val,
+          posts: await hashtagService.getPostsForTags(
+            `${Instagram_Url}explore/tags/${val}/${Instagram_Api_Param}`
+          ),
+        };
+      })
+    );
     const image: ImageDetails = {
       id: shortCode,
       er: er,
       timeStamp: media.taken_at_timestamp,
-      hashTags: hashTags ? hashTags : [],
+      hashTags: hashTags ? hashTagsWithPosts : [],
       caption: media.edge_media_to_caption.edges[0]
         ? media.edge_media_to_caption.edges[0].node.text
         : "",

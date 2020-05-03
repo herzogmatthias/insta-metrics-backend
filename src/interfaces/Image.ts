@@ -7,7 +7,7 @@ export interface ImageDetails {
   comments: number;
   caption: string;
   previewComments: Comment[];
-  hashTags: string[];
+  hashTags: { name: string; posts: number }[];
   images: Image[];
 }
 export interface Comment {
