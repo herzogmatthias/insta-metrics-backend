@@ -2,7 +2,6 @@ import BasicUserInformation from "../interfaces/BasicUserInformation";
 import { UserRootData } from "../interfaces/InstagramUserData";
 import { BasicStatistics } from "../interfaces/BasicStatistics";
 import { Instagram_Url, Instagram_Api_Param } from "../config";
-import { PostRootData } from "../interfaces/InstagramPostData";
 import fetch, { Response } from "node-fetch";
 import { PictureStats } from "../interfaces/PictureStats";
 import { Tag } from "../interfaces/Tag";
@@ -46,18 +45,6 @@ export default class UserService {
         };
       }
     } catch {
-      const restart = await fetch(
-        "https://api.heroku.com/app/insta-metrics/dynos",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/vnd.heroku+json; version=3",
-            Authorization: "Bearer " + process.env.heroku_api_key,
-          },
-        }
-      );
-      console.log(restart);
       return { error: true, text: "Restarting Dynos" };
     }
   }

@@ -12,10 +12,8 @@ export const newUser = async (req: e.Request, res: e.Response) => {
   const isBot = req.query.isBot as boolean;
   const URI = `${Instagram_Url}${req.params.username}/${Instagram_Api_Param}`;
   const validUsername = await checkUserName(req.params.username);
-  if (!validUsername) {
-    res
-      .status(400)
-      .json({ text: "Username does not exist", error: true } as Error);
+  if (!validUsername.success) {
+    res.status(400).json({ text: validUsername.type, error: true } as Error);
     return;
   }
   const users = (await UserRepository.getAllUsers()) as any[];
