@@ -8,7 +8,6 @@ import { Tag } from "../interfaces/Tag";
 import PostService from "./PostService";
 import User from "../interfaces/User";
 import UserRepository from "../repositories/userRepository";
-import Error from "../interfaces/Error";
 import { ImagePreview } from "../interfaces/Image";
 
 export default class UserService {
@@ -16,10 +15,8 @@ export default class UserService {
     url: string,
     isBot?: boolean,
     withDescription: boolean = false
-  ): Promise<BasicUserInformation | Error> {
-    console.log(isBot);
+  ): Promise<BasicUserInformation> {
     const response = await fetch(url);
-    console.log(response);
     try {
       const data = await response.json();
       const user = data.graphql.user;
@@ -45,11 +42,10 @@ export default class UserService {
         };
       }
     } catch {
-      return { error: true, text: "Restarting Dynos" };
+      throw new Error("Rate Limit reached");
     }
   }
   async getBasicStats(url: string): Promise<BasicStatistics> {
-    console.log(url);
     const user = ((await (await fetch(url)).json()) as UserRootData).graphql
       .user;
     return {
@@ -136,21 +132,21 @@ export default class UserService {
       undefined,
       true
     );
-    if ((basic as BasicUserInformation).avatar) {
+    if (basic instanceof Error) {
+      throw basic;
+    } else {
       basic = basic as BasicUserInformation;
       user.description = basic.description!;
       user.avatar = basic.avatar;
       user.name = basic.name;
       return user;
-    } else {
-      return basic as Error;
     }
   }
   async getGraphData(username: string) {
     const postService = new PostService();
     let images = await postService.getLastFiftyPictures(username);
-    if ((images as Error).text) {
-      return images as Error;
+    if (images instanceof Error) {
+      throw images;
     } else {
       images = images as ImagePreview[];
       images.sort((a, b) => a.timeStamp - b.timeStamp);

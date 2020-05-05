@@ -1,0 +1,16 @@
+{
+  "name": "Insta-Metrics-Backend",
+  "version": "0.1.0",
+  "description": "API for Insta-Metrics, collecting data from Instagrams API",
+  "title": "Insta-Metrics-Backend",
+  "url": "https://api.github.com/v1",
+  "sampleUrl": false,
+  "defaultVersion": "0.0.0",
+  "apidoc": "0.3.0",
+  "generator": {
+    "name": "apidoc",
+    "time": "2020-05-05T12:12:40.990Z",
+    "url": "http://apidocjs.com",
+    "version": "0.22.0"
+  }
+}

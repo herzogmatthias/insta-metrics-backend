@@ -21,7 +21,6 @@ import {
 import UserService from "./UserService";
 import { Ranking } from "../interfaces/Ranking";
 import HashtagService from "./HashtagService";
-import Error from "../interfaces/Error";
 
 export default class PostService {
   async getDetailsForPicture(shortCode: string) {
@@ -35,6 +34,7 @@ export default class PostService {
         .match(/#\w+/g)
         ?.map((v) => v.replace("#", ""));
     }
+    hashTags = hashTags ? hashTags : [];
     const hashtagService = new HashtagService();
     const hashTagsWithPosts = await Promise.all(
       hashTags!.map(async (val) => {
@@ -128,8 +128,8 @@ export default class PostService {
     const [igId, cursor] = [...data[0]];
     const followers = data[1];
     const basic = data[2];
-    if ((basic as Error).text) {
-      return basic as Error;
+    if (basic instanceof Error) {
+      throw basic;
     } else {
       let media = ((await (
         await fetch(`${Instagram_Url}${username}/${Instagram_Api_Param}`)
@@ -247,7 +247,7 @@ export default class PostService {
     const username = media.owner.username;
     const er = await this.getErForPost(username, shortCode);
     let images = await this.getLastFiftyPictures(username);
-    if ((images as Error).text) {
+    if (images instanceof Error) {
       return images as Error;
     } else {
       images = images as ImagePreview[];

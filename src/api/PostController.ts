@@ -1,18 +1,18 @@
 import e from "express";
 import PostService from "../services/PostService";
-import Error from "../interfaces/Error";
 import { ImagePreview } from "../interfaces/Image";
 
 export const lastFiftyPictures = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
   const postService = new PostService();
-  let images = await postService.getLastFiftyPictures(username);
-  if ((images as Error).text) {
-    res.status(500).send(images);
-  } else {
+  let images = [];
+  try {
+    images = await postService.getLastFiftyPictures(username);
     images = images as ImagePreview[];
     images.sort((a, b) => b.timeStamp - a.timeStamp);
     res.json(images);
+  } catch (e) {
+    res.status(500).send({ name: e.name, stack: e.stack, message: e.message });
   }
 };
 export const detailsForPicture = async (req: e.Request, res: e.Response) => {

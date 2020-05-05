@@ -8,5 +8,5 @@ export const postsForTags = async (req: e.Request, res: e.Response) => {
   const posts: number = await hashtagService.getPostsForTags(
     `${Instagram_Url}explore/tags/${hashtag}/${Instagram_Api_Param}`
   );
-  res.json(posts);
+  res.json({ posts: posts });
 };

@@ -1,7 +1,6 @@
 import e = require("express");
 import UserRepository from "../repositories/userRepository";
 import { checkUserName } from "../services/checkUsername";
-import Error from "../interfaces/Error";
 import User from "../interfaces/User";
 import { Instagram_Api_Param, Instagram_Url } from "../config";
 import BasicUserInformation from "../interfaces/BasicUserInformation";
@@ -13,14 +12,12 @@ export const newUser = async (req: e.Request, res: e.Response) => {
   const URI = `${Instagram_Url}${req.params.username}/${Instagram_Api_Param}`;
   const validUsername = await checkUserName(req.params.username);
   if (!validUsername.success) {
-    res.status(400).json({ text: validUsername.type, error: true } as Error);
+    res.status(400).json({ text: validUsername.type, error: true });
     return;
   }
   const users = (await UserRepository.getAllUsers()) as any[];
   if (users.find((v) => v.userName === req.params.username)) {
-    res
-      .status(400)
-      .json({ text: "Username already exists", error: true } as Error);
+    res.status(400).json({ text: "Username already exists", error: true });
     return;
   }
   const userService = new UserService();
@@ -34,22 +31,32 @@ export const avgCommentsAndLikes = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
   const userService = new UserService();
   const avgStats = await userService.getAvgCommentsAndLikes(
-    `${Instagram_Url}${username}/`
+    `${Instagram_Url}${username}/${Instagram_Api_Param}`
   );
   res.json(avgStats);
 };
 export const generalInformation = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
   const userService = new UserService();
-  const user = await userService.getGeneralInformation(username);
-  res.json(user);
+  let user = undefined;
+  try {
+    user = await userService.getGeneralInformation(username);
+    res.json(user);
+  } catch (e) {
+    res.status(500).send({ name: e.name, stack: e.stack, message: e.message });
+  }
 };
 
 export const graphData = async (req: e.Request, res: e.Response) => {
   const username = req.params.username as string;
   const userService = new UserService();
-  const graphData = await userService.getGraphData(username);
-  res.json(graphData);
+  let graphData = undefined;
+  try {
+    graphData = await userService.getGraphData(username);
+    res.json(graphData);
+  } catch (e) {
+    res.status(500).send({ name: e.name, stack: e.stack, message: e.message });
+  }
 };
 
 export const deleteUser = async (req: e.Request, res: e.Response) => {
@@ -72,17 +79,18 @@ export const basicInformation = async (req: e.Request, res: e.Response) => {
       .then((val) => {
         UserRepository.updateUser(val);
       });
-    const userInfo:
-      | BasicUserInformation
-      | Error = await userService.getBasicInformation(
-      `${Instagram_Url}${user.userName}/${Instagram_Api_Param}`
-    );
-    if ((userInfo as Error).text) {
-      res.status(500).send(userInfo);
+    let userInfo = undefined;
+    try {
+      userInfo = await userService.getBasicInformation(
+        `${Instagram_Url}${user.userName}/${Instagram_Api_Param}`
+      );
+      userData.push(userInfo as BasicUserInformation);
+    } catch (e) {
+      res
+        .status(500)
+        .send({ name: e.name, stack: e.stack, message: e.message });
       error = true;
       break;
-    } else {
-      userData.push(userInfo as BasicUserInformation);
     }
   }
   if (!error) {
@@ -110,5 +118,5 @@ export const getAvgEngagementRate = async (req: e.Request, res: e.Response) => {
   const avgStats = await postService.getAvgEngagementRate(
     `${Instagram_Url}${username}/`
   );
-  res.json(avgStats);
+  res.json({ er: avgStats });
 };

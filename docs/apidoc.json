@@ -1,0 +1,11 @@
+{
+  "name": "Worktile-API",
+  "version": "7.3.0",
+  "description": "Worktile API",
+  "title": "Worktile RESTful API",
+  "url": "http://worktile.com",
+  "template": {
+    "withCompare": false,
+    "withGenerator": false
+  }
+}
